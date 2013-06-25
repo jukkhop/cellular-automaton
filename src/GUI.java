@@ -77,91 +77,9 @@ public class GUI extends JFrame {
      */
     class menuBarListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == open) {
-                if (changesMade) {
-                    int option = JOptionPane.showOptionDialog(null, 
-                    "You have unsaved changes - are you sure you want to quit?", 
-                    "Confirm quit", 
-                    JOptionPane.YES_NO_OPTION, 
-                    JOptionPane.QUESTION_MESSAGE,
-                    null, new String[] {"Yes", "No"}, null);
-                    
-                    if (option == JOptionPane.YES_OPTION) {
-                        save();
-                    }
-                }
-                
-                int option2 = fileChooser.showOpenDialog(GUI.this);
-                if (option2 == JFileChooser.APPROVE_OPTION) {
-                    /*
-                    try {
-                        fileChooser.getSelectedFile();
-                        changesMade = false;
-
-                    } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(GUI.this,
-                        "Ensure that you have read permissions to the file " +
-                        "and that the file is valid.",
-                        "Error opening file!",
-                        JOptionPane.ERROR_MESSAGE);
-
-                    } catch (ClassNotFoundException ex) {
-                        JOptionPane.showMessageDialog(GUI.this,
-                        "Varmista, että tiedosto Ottelurekisteri.java löytyy " +
-                        "hakemistosta, josta ohjelmaa ajetaan.",
-                        "Ohjelmasta puuttuu tiedostoja!",
-                        JOptionPane.WARNING_MESSAGE);
-                    }
-                    */
-                }
-            }
-            
-            if ( e.getSource() == save ) save();
-            if ( e.getSource() == quit ) quit();
-        }
-        
-        private void save() {
-            boolean ready = false;
-            int option;
-            File file = null;
-            String path;
-            
-            while (!ready) {
-                option = fileChooser.showSaveDialog(GUI.this);
-                
-                if (option == JFileChooser.APPROVE_OPTION) {
-                    file = fileChooser.getSelectedFile();
-                    path = file.getAbsolutePath();
-
-                    if (file.exists()) {
-                        option = JOptionPane.showOptionDialog(GUI.this, 
-                        file.getName() + " already exists - do you want to replace it?", 
-                        "Confirm overwrite", 
-                        JOptionPane.YES_NO_OPTION, 
-                        JOptionPane.QUESTION_MESSAGE,
-                        null, new String[] {"Yes", "No"}, null);
-
-                        if (option == JOptionPane.YES_OPTION) {
-                            ready = true;
-                        }
-                    }
-                    else ready = true;
-                }
-                else return;
-            }
-            
-            /*
-            try {
-                changesMade = false;
-
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(GUI.this,
-                "Varmista, että sinulla on kirjoitusoikeudet hakemistoon, " +
-                "johon yritit tallentaa.",
-                "Virhe kirjoittaessa tiedostoa!",
-                JOptionPane.ERROR_MESSAGE);
-            }
-            */
+            if (e.getSource() == open) open();
+            if (e.getSource() == save) save();
+            if (e.getSource() == quit) quit();
         }
     }
     
@@ -201,7 +119,90 @@ public class GUI extends JFrame {
 
         } else return true;
     }
+
+    private void open() {
+        if (changesMade) {
+            int option = JOptionPane.showOptionDialog(null, 
+            "You have unsaved changes - are you sure you want to quit?", 
+            "Confirm quit", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.QUESTION_MESSAGE,
+            null, new String[] {"Yes", "No"}, null);
+            
+            if (option == JOptionPane.YES_OPTION) {
+                save();
+            }
+        }
+        
+        int option2 = fileChooser.showOpenDialog(GUI.this);
+        if (option2 == JFileChooser.APPROVE_OPTION) {
+            /*
+            try {
+                fileChooser.getSelectedFile();
+                changesMade = false;
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(GUI.this,
+                "Ensure that you have read permissions to the file " +
+                "and that the file is valid.",
+                "Error opening file!",
+                JOptionPane.ERROR_MESSAGE);
+
+            } catch (ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(GUI.this,
+                "Varmista, että tiedosto Ottelurekisteri.java löytyy " +
+                "hakemistosta, josta ohjelmaa ajetaan.",
+                "Ohjelmasta puuttuu tiedostoja!",
+                JOptionPane.WARNING_MESSAGE);
+            }
+            */
+        }
+    }
     
+    private void save() {
+        boolean ready = false;
+        int option;
+        File file = null;
+        String path;
+        
+        while (!ready) {
+            option = fileChooser.showSaveDialog(GUI.this);
+            
+            if (option == JFileChooser.APPROVE_OPTION) {
+                file = fileChooser.getSelectedFile();
+                path = file.getAbsolutePath();
+
+                if (file.exists()) {
+                    option = JOptionPane.showOptionDialog(GUI.this, 
+                    file.getName() + " already exists - do you want to replace it?", 
+                    "Confirm overwrite", 
+                    JOptionPane.YES_NO_OPTION, 
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, new String[] {"Yes", "No"}, null);
+
+                    if (option == JOptionPane.YES_OPTION) {
+                        ready = true;
+                    }
+                }
+                else ready = true;
+            }
+            else return;
+        }
+        
+        /*
+        try {
+            changesMade = false;
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(GUI.this,
+            "Varmista, että sinulla on kirjoitusoikeudet hakemistoon, " +
+            "johon yritit tallentaa.",
+            "Virhe kirjoittaessa tiedostoa!",
+            JOptionPane.ERROR_MESSAGE);
+        }
+        */
+    }
+
     /** 
      * Closes the application, asking confirmation if necessary.
      */
