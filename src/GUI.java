@@ -21,16 +21,22 @@ public class GUI extends JFrame {
     final static int width = 1280;
     final static int height = 960;
 
-    final static int grid_width = 760;
-    final static int grid_height = 760;
+    final static int grid_width = 720;
+    final static int grid_height = 720;
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
 
     boolean changesMade = false;
     
-    // Save folder path
+    /** Save folder path */
     private final String savePath = "./save";
+
+    /** */
+    private static Automaton automaton;
+
+    /** */
+    private static GridDisplay gridDisplay;
 
     public GUI() {
         JMenuBar menuBar = new JMenuBar();
@@ -67,16 +73,23 @@ public class GUI extends JFrame {
         // South panel
         JPanel south_panel = new JPanel(new GridLayout(1, 1, 0, 0));
         south_panel.setBorder(new LineBorder(Color.BLACK, 1));
-        south_panel.setPreferredSize(new Dimension(width, 200));
+        south_panel.setPreferredSize(new Dimension(width, 170));
 
         // East panel
         JPanel east_panel = new JPanel(new GridLayout(1, 1, 0, 0));
         east_panel.setBorder(new LineBorder(Color.BLACK, 1));
         east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
 
+        // Set beginning state to automaton
+        automaton.spawnCell(0, 0);
+        automaton.spawnCell(0, 1);
+        automaton.spawnCell(0, 2);
+        automaton.spawnCell(-1, 2);
+        automaton.spawnCell(-2, 1);
+
         // Populate grid_panel
-        ArrayList<Cell> cells = new ArrayList<Cell>();
-        grid_panel.add(new GridDisplay(cells));
+        gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
+        grid_panel.add(gridDisplay);
 
         // Populate main panel
         main_panel.add(grid_panel, BorderLayout.WEST);
@@ -274,5 +287,9 @@ public class GUI extends JFrame {
                 createAndShowGUI();
             }
         });
+
+        // Create the automaton and start the simulation
+        automaton = new Automaton();
+        automaton.start();
     }
 }

@@ -14,14 +14,23 @@ import java.util.ArrayList;
  */
 public class GridDisplay extends JPanel {
     
-    private int xCoord = 100;
-    private int yCoord = 100;
-    private int repaintInterval = 100;
+    private int width;
+    private int height;
+
+    private int size = 48;
+    private int repaintInterval = 16;
 
     private ArrayList<Cell> cells;
 
-    public GridDisplay(ArrayList<Cell> cells) {
-        this.cells = cells;
+    private int squareSize, center;
+
+    public GridDisplay(int width, int height, ArrayList<Cell> cells) {
+        this.width  = width;
+        this.height = height;
+        this.cells  = cells;
+
+        setSize(size);
+        setBackground(Color.WHITE);
 
         Timer timer = new Timer(repaintInterval, new TimerListener());
         timer.start();
@@ -30,13 +39,34 @@ public class GridDisplay extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.drawString("juu", xCoord, yCoord);
+        g.setColor(new Color(100, 100, 100));
+        int pos;
+        for (int i=1 ; i<size ; i++) {
+            pos = i*squareSize;
+            g.drawLine(pos, 0, pos, height);
+            g.drawLine(0, pos, width, pos);
+        }
+
+        g.setColor(Color.BLACK);
+        int x, y;
+        for (Cell cell : cells) {
+            if (cell.state == Cell.DEAD) continue;
+            x = center + cell.x;
+            y = center + cell.y;
+            g.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
+        }
     }
 
     class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             repaint();
         }
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+        squareSize = width / size;
+        center = (int) Math.floor(size / 2) - 1;
     }
  
 }
