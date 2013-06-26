@@ -34,14 +34,9 @@ public class Automaton {
         }
         if (!existsAlready) cells.add(new Cell(x, y, Cell.ALIVE));
 
-        int[][] neighs = {  {  x, y-1},
-                            {x+1, y-1},
-                            {x+1, y  },
-                            {x+1, y+1},
-                            {  x, y+1},
-                            {x-1, y+1},
-                            {x-1, y  },
-                            {x-1, y-1}  };
+        int[][] neighs = { {  x, y-1}, {x+1, y-1}, {x+1, y  }, {x+1, y+1},
+                           {  x, y+1}, {x-1, y+1}, {x-1, y  }, {x-1, y-1}
+                         };
 
         for (int i=0 ; i<neighs.length ; i++) {
             boolean neighExists = false;
@@ -60,21 +55,11 @@ public class Automaton {
         tickCount++;
         for (Cell cell : cells) {
             int n = countNeighbours(cell);
-
             if (cell.state == Cell.ALIVE) {
-                if (n<2 || n>3) {
-                    cell.nextState = Cell.DEAD;
-                } else {
-                    cell.nextState = Cell.ALIVE;
-                }
+                cell.nextState = (n<2 || n>3) ? Cell.DEAD : Cell.ALIVE;
             }
-
             if (cell.state == Cell.DEAD) {
-                if (n==3) {
-                    cell.nextState = Cell.ALIVE;
-                } else {
-                    cell.nextState = Cell.DEAD;
-                }
+                cell.nextState = (n == 3) ? Cell.ALIVE : Cell.DEAD;
             }
         }
 
@@ -93,7 +78,6 @@ public class Automaton {
         int n = 0;
         for (Cell cell : cells) {
             if (cell == c || cell.state == Cell.DEAD) continue;
-
             int xd = cell.x - c.x;
             int yd = cell.y - c.y;
             if (Math.sqrt(xd*xd + yd*yd) < 2) n++;
