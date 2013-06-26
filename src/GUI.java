@@ -9,6 +9,7 @@ import javax.swing.border.*;
 import javax.swing.filechooser.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * .
@@ -17,6 +18,12 @@ import java.io.IOException;
  */
 public class GUI extends JFrame {
     
+    final static int width = 1280;
+    final static int height = 960;
+
+    final static int grid_width = 760;
+    final static int grid_height = 760;
+
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
 
@@ -49,10 +56,34 @@ public class GUI extends JFrame {
         menuBar.add(fileMenu);
         
         // Main panel
-        JPanel main_panel = new JPanel(new BorderLayout(6, 0));
-        main_panel.setBorder(new EmptyBorder(8, 8, 8, 0));
+        JPanel main_panel = new JPanel(new BorderLayout(4, 4));
+        main_panel.setBorder(new EmptyBorder(8, 8, 8, 8));
         
-        //
+        // Grid panel
+        JPanel grid_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        grid_panel.setBorder(new LineBorder(Color.BLACK, 1));
+        grid_panel.setPreferredSize(new Dimension(grid_width, grid_height));
+
+        // South panel
+        JPanel south_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        south_panel.setBorder(new LineBorder(Color.BLACK, 1));
+        south_panel.setPreferredSize(new Dimension(width, 200));
+
+        // East panel
+        JPanel east_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        east_panel.setBorder(new LineBorder(Color.BLACK, 1));
+        east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
+
+        // Populate grid_panel
+        ArrayList<Cell> cells = new ArrayList<Cell>();
+        grid_panel.add(new GridDisplay(cells));
+
+        // Populate main panel
+        main_panel.add(grid_panel, BorderLayout.WEST);
+        main_panel.add(south_panel, BorderLayout.SOUTH);
+        main_panel.add(east_panel, BorderLayout.EAST);
+
+        // Populate frame
         setJMenuBar(menuBar);
         add(main_panel);
 
@@ -223,12 +254,12 @@ public class GUI extends JFrame {
     }
     
     /** 
-     * This method creates and shows the application window
+     * This method creates and shows the application window.
      */
     private static void createAndShowGUI() {
         GUI frame = new GUI();
         frame.setTitle("Cellular automaton");
-        frame.setSize(1280, 960);
+        frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setVisible(true);
