@@ -26,6 +26,7 @@ public class GUI extends JFrame {
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
+    private JButton start, stop;
 
     boolean changesMade = false;
     
@@ -82,14 +83,20 @@ public class GUI extends JFrame {
 
         // Set beginning state to automaton
         automaton.spawnCell(0, 0);
-        automaton.spawnCell(0, 1);
-        automaton.spawnCell(0, 2);
-        automaton.spawnCell(-1, 2);
-        automaton.spawnCell(-2, 1);
+        //automaton.spawnCell(0, 1);
+        //automaton.spawnCell(0, 2);
+        //automaton.spawnCell(-1, 2);
+        //automaton.spawnCell(-2, 1);
 
         // Populate grid_panel
         gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
         grid_panel.add(gridDisplay);
+
+        // Populate east panel
+        JButton start = new JButton("Start");
+        JButton stop = new JButton("Stop");
+        east_panel.add(start);
+        east_panel.add(stop);
 
         // Populate main panel
         main_panel.add(grid_panel, BorderLayout.WEST);
@@ -105,6 +112,24 @@ public class GUI extends JFrame {
         save.addActionListener(new menuBarListener());
         quit.addActionListener(new menuBarListener());
         this.addWindowListener(new frameListener());
+
+        grid_panel.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                gridClicked(e);
+            }
+        });
+
+        start.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                automaton.start();
+            }
+        });
+
+        stop.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                automaton.stop();
+            }
+        });
     }
     
     /**
@@ -126,6 +151,25 @@ public class GUI extends JFrame {
             if (e.getSource() == quit) quit();
         }
     }
+
+    void gridClicked(MouseEvent e) {
+        System.out.println("clicked");
+
+        int x = gridDisplay.coordToPos(e.getX());
+        int y = gridDisplay.coordToPos(e.getY());
+
+        System.out.println("clicked at ("+e.getX()+", "+e.getY()+"), becomes ("+x+", "+y+")");
+
+        Cell c = automaton.getCellAt(x, y);
+        if (c==null || c.state==Cell.DEAD) {
+            automaton.spawnCell(x, y);
+        } else {
+            c.state = Cell.DEAD;
+        }
+
+    }
+
+
     
     class MyFileChooser extends JFileChooser {
         MyFileChooser() {
@@ -290,6 +334,6 @@ public class GUI extends JFrame {
 
         // Create the automaton and start the simulation
         automaton = new Automaton();
-        automaton.start();
+        //automaton.start();
     }
 }

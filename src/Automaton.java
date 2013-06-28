@@ -14,11 +14,14 @@ import java.util.ArrayList;
  */
 public class Automaton {
     
-    private int tickInterval = 380;
+    private int tickInterval = 360;
     private int tickCount = 0;
 
     // Cells in the automaton
     private ArrayList<Cell> cells;
+
+    // 
+    private Timer timer;
 
     public Automaton() {
         cells = new ArrayList<Cell>();
@@ -89,8 +92,15 @@ public class Automaton {
         return cells;
     }
 
+    public Cell getCellAt(int x, int y) {
+        for (Cell c : cells) {
+            if (c.x==x && c.y==y) return c;
+        }
+        return null;
+    }
+
     public void start() {
-        Timer timer = new Timer(tickInterval, new TimerListener());
+        timer = new Timer(tickInterval, new TimerListener());
         timer.start();
     }
 
@@ -99,5 +109,10 @@ public class Automaton {
             tick();
         }
     }
+
+    public void stop() {
+        timer.stop();
+    }
+
  
 }

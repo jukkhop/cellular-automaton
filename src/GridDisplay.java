@@ -68,5 +68,14 @@ public class GridDisplay extends JPanel {
         squareSize = width / size;
         center = (int) Math.floor(size / 2) - 1;
     }
+
+    public int coordToPos(int coord) {
+        int centerCoord = (center+1) * squareSize;
+        if (coord > centerCoord) {
+            return (coord-centerCoord)/squareSize + 1;
+        } else {
+            return (centerCoord-coord)/squareSize * -1;
+        }
+    }
  
 }
