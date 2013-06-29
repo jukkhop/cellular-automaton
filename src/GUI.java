@@ -81,13 +81,6 @@ public class GUI extends JFrame {
         east_panel.setBorder(new LineBorder(Color.BLACK, 1));
         east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
 
-        // Set beginning state to automaton
-        automaton.spawnCell(0, 0);
-        //automaton.spawnCell(0, 1);
-        //automaton.spawnCell(0, 2);
-        //automaton.spawnCell(-1, 2);
-        //automaton.spawnCell(-2, 1);
-
         // Populate grid_panel
         gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
         grid_panel.add(gridDisplay);
@@ -153,12 +146,8 @@ public class GUI extends JFrame {
     }
 
     void gridClicked(MouseEvent e) {
-        System.out.println("clicked");
-
         int x = gridDisplay.coordToPos(e.getX());
         int y = gridDisplay.coordToPos(e.getY());
-
-        System.out.println("clicked at ("+e.getX()+", "+e.getY()+"), becomes ("+x+", "+y+")");
 
         Cell c = automaton.getCellAt(x, y);
         if (c==null || c.state==Cell.DEAD) {
@@ -166,10 +155,7 @@ public class GUI extends JFrame {
         } else {
             c.state = Cell.DEAD;
         }
-
     }
-
-
     
     class MyFileChooser extends JFileChooser {
         MyFileChooser() {
@@ -334,6 +320,5 @@ public class GUI extends JFrame {
 
         // Create the automaton and start the simulation
         automaton = new Automaton();
-        //automaton.start();
     }
 }
