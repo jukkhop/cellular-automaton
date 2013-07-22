@@ -19,7 +19,7 @@ public class GridDisplay extends JPanel {
     private ArrayList<Cell> cells;
 
     private int drawGrill = 1;
-    private int squareSize = 48;
+    private int squareSize = 20;
 
     private int repaintInterval = 16;
 
@@ -44,7 +44,7 @@ public class GridDisplay extends JPanel {
         if (drawGrill == 1) {
             g.setColor(new Color(100, 100, 100));
             int pos;
-            for (int i=1 ; i<size ; i++) {
+            for (int i=1 ; i<=size ; i++) {
                 pos = i*squareSize;
                 g.drawLine(pos, 0, pos, height);
                 g.drawLine(0, pos, width, pos);
@@ -73,7 +73,7 @@ public class GridDisplay extends JPanel {
 
         this.squareSize = squareSize;
         size = width / squareSize;
-        center = (int) Math.floor(size/2) - 1;
+        center = size/2;
     }
 
     public int getSquareSize() {
@@ -81,11 +81,11 @@ public class GridDisplay extends JPanel {
     }
 
     public int coordToPos(int coord) {
-        int centerCoord = (center+1) * squareSize;
+        int centerCoord = (center) * squareSize;
         if (coord > centerCoord) {
-            return (coord-centerCoord)/squareSize + 1;
+            return (coord-centerCoord)/squareSize;
         } else {
-            return (centerCoord-coord)/squareSize * -1;
+            return ((centerCoord-coord)/squareSize * -1) -1;
         }
     }
 
