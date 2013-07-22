@@ -39,6 +39,7 @@ public class GridDisplay extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Piirrä grid
         g.setColor(new Color(100, 100, 100));
         int pos;
         for (int i=1 ; i<size ; i++) {
@@ -47,6 +48,7 @@ public class GridDisplay extends JPanel {
             g.drawLine(0, pos, width, pos);
         }
 
+        // Piirrä solut
         g.setColor(Color.BLACK);
         int x, y;
         for (Cell cell : cells) {
@@ -66,7 +68,7 @@ public class GridDisplay extends JPanel {
     public void setSize(int size) {
         this.size = size;
         squareSize = width / size;
-        center = (int) Math.floor(size / 2) - 1;
+        center = (int) Math.floor(size/2) - 1;
     }
 
     public int coordToPos(int coord) {

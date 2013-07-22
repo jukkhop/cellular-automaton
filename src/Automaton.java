@@ -13,9 +13,13 @@ import java.util.ArrayList;
  * @author Hopeavuori Jukka
  */
 public class Automaton {
-    
+
+    public static final int ON  = 1;
+    public static final int OFF = 0; 
+
+    private int state        = OFF;
     private int tickInterval = 360;
-    private int tickCount = 0;
+    private int tickCount    = 0;
 
     // Cells in the automaton
     private ArrayList<Cell> cells;
@@ -28,27 +32,27 @@ public class Automaton {
     }
 
     public void spawnCell(int x, int y) {
-        boolean existsAlready = false;
+        boolean exists = false;
         for (Cell cell : cells) {
             if (x == cell.x && y == cell.y) {
                 cell.state = Cell.ALIVE;
-                existsAlready = true;
+                exists = true;
             }
         }
-        if (!existsAlready) cells.add(new Cell(x, y, Cell.ALIVE));
+        if (!exists) cells.add(new Cell(x, y, Cell.ALIVE));
 
-        int[][] neighs = { {  x, y-1}, {x+1, y-1}, {x+1, y  }, {x+1, y+1},
-                           {  x, y+1}, {x-1, y+1}, {x-1, y  }, {x-1, y-1}
+        int[][] neighs = {  {x, y-1}, {x+1, y-1}, {x+1, y}, {x+1, y+1},
+                            {x, y+1}, {x-1, y+1}, {x-1, y}, {x-1, y-1}
                          };
 
         for (int i=0 ; i<neighs.length ; i++) {
-            boolean neighExists = false;
+            exists = false;
             for (Cell cell : cells) {
                 if (neighs[i][0] == cell.x && neighs[i][1] == cell.y) {
-                    neighExists = true;
+                    exists = true;
                 }
             }
-            if (!neighExists) {
+            if (!exists) {
                 cells.add(new Cell(neighs[i][0], neighs[i][1], Cell.DEAD));
             }
         }
@@ -99,20 +103,30 @@ public class Automaton {
         return null;
     }
 
-    public void start() {
-        timer = new Timer(tickInterval, new TimerListener());
-        timer.start();
-    }
-
     class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             tick();
         }
     }
 
-    public void stop() {
-        timer.stop();
+    public boolean start() {
+        if (state == OFF) {
+            timer = new Timer(tickInterval, new TimerListener());
+            timer.start();
+            state = ON;
+            return true;
+        }
+        return false;
     }
 
- 
+    public boolean stop() {
+        if (state == ON) {
+            timer.stop();
+            state = OFF;
+            return true;
+        }
+        return false;
+    }
+
+
 }

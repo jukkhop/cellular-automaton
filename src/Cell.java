@@ -14,8 +14,7 @@ public class Cell {
     public static final int ALIVE = 1;
     public static final int DEAD  = 0; 
 
-    int x, y;
-    int state, nextState;
+    int x, y, state, nextState;
 
     public Cell(int x, int y, int state) {
         this.x = x;

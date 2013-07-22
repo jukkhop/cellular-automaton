@@ -27,6 +27,7 @@ public class GUI extends JFrame {
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
     private JButton start, stop;
+    private JTextArea logArea;
 
     boolean changesMade = false;
     
@@ -38,6 +39,8 @@ public class GUI extends JFrame {
 
     /** */
     private static GridDisplay gridDisplay;
+
+    private final static String newline = "\n";
 
     public GUI() {
         JMenuBar menuBar = new JMenuBar();
@@ -77,7 +80,7 @@ public class GUI extends JFrame {
         south_panel.setPreferredSize(new Dimension(width, 170));
 
         // East panel
-        JPanel east_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        JPanel east_panel = new JPanel(new GridLayout(1, 2, 0, 0));
         east_panel.setBorder(new LineBorder(Color.BLACK, 1));
         east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
 
@@ -90,6 +93,15 @@ public class GUI extends JFrame {
         JButton stop = new JButton("Stop");
         east_panel.add(start);
         east_panel.add(stop);
+
+        // Populate south panel
+        logArea = new JTextArea(5, 20);
+        JScrollPane scrollPane = new JScrollPane(logArea); 
+        scrollPane.setVerticalScrollBarPolicy(
+                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        //scrollPane.setPreferredSize();
+        logArea.setEditable(false);
+        south_panel.add(scrollPane);
 
         // Populate main panel
         main_panel.add(grid_panel, BorderLayout.WEST);
@@ -114,13 +126,21 @@ public class GUI extends JFrame {
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                automaton.start();
+                if (automaton.start()) {
+                    logArea.append("Simulation started..." + newline);
+                } else {
+                    logArea.append("Simulation already running." + newline);
+                }
             }
         });
 
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                automaton.stop();
+                if (automaton.stop()) {
+                    logArea.append("Simulation stopped." + newline);
+                } else {
+                    logArea.append("Simulation already stopped." + newline);
+                }
             }
         });
     }
@@ -224,8 +244,7 @@ public class GUI extends JFrame {
 
             } catch (ClassNotFoundException ex) {
                 JOptionPane.showMessageDialog(GUI.this,
-                "Varmista, että tiedosto Ottelurekisteri.java löytyy " +
-                "hakemistosta, josta ohjelmaa ajetaan.",
+                "",
                 "Ohjelmasta puuttuu tiedostoja!",
                 JOptionPane.WARNING_MESSAGE);
             }
@@ -293,7 +312,7 @@ public class GUI extends JFrame {
                 System.exit(0);
             }
 
-        } else { System.exit(0); }
+        } else System.exit(0);
     }
     
     /** 
@@ -318,7 +337,7 @@ public class GUI extends JFrame {
             }
         });
 
-        // Create the automaton and start the simulation
+        // Create the automaton
         automaton = new Automaton();
     }
 }
