@@ -16,20 +16,21 @@ public class GridDisplay extends JPanel {
     
     private int width;
     private int height;
-
-    private int size = 48;
-    private int repaintInterval = 16;
-
     private ArrayList<Cell> cells;
 
-    private int squareSize, center;
+    private int drawGrill = 1;
+    private int squareSize = 48;
+
+    private int repaintInterval = 16;
+
+    private int size, center;
 
     public GridDisplay(int width, int height, ArrayList<Cell> cells) {
         this.width  = width;
         this.height = height;
         this.cells  = cells;
 
-        setSize(size);
+        setSquareSize(squareSize);
         setBackground(Color.WHITE);
 
         Timer timer = new Timer(repaintInterval, new TimerListener());
@@ -39,16 +40,18 @@ public class GridDisplay extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Piirrä grid
-        g.setColor(new Color(100, 100, 100));
-        int pos;
-        for (int i=1 ; i<size ; i++) {
-            pos = i*squareSize;
-            g.drawLine(pos, 0, pos, height);
-            g.drawLine(0, pos, width, pos);
+        // Draw the grid
+        if (drawGrill == 1) {
+            g.setColor(new Color(100, 100, 100));
+            int pos;
+            for (int i=1 ; i<size ; i++) {
+                pos = i*squareSize;
+                g.drawLine(pos, 0, pos, height);
+                g.drawLine(0, pos, width, pos);
+            }
         }
 
-        // Piirrä solut
+        // Draw the cells
         g.setColor(Color.BLACK);
         int x, y;
         for (Cell cell : cells) {
@@ -65,10 +68,16 @@ public class GridDisplay extends JPanel {
         }
     }
 
-    public void setSize(int size) {
-        this.size = size;
-        squareSize = width / size;
+    public void setSquareSize(int squareSize) {
+        if (squareSize < 1) squareSize = 1;
+
+        this.squareSize = squareSize;
+        size = width / squareSize;
         center = (int) Math.floor(size/2) - 1;
+    }
+
+    public int getSquareSize() {
+        return squareSize;
     }
 
     public int coordToPos(int coord) {
@@ -78,6 +87,11 @@ public class GridDisplay extends JPanel {
         } else {
             return (centerCoord-coord)/squareSize * -1;
         }
+    }
+
+    public void toggleGrill() {
+        if (drawGrill == 1) drawGrill = 0;
+        else drawGrill = 1;
     }
  
 }

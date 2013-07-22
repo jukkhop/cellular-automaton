@@ -71,17 +71,16 @@ public class GUI extends JFrame {
         
         // Grid panel
         JPanel grid_panel = new JPanel(new GridLayout(1, 1, 0, 0));
-        grid_panel.setBorder(new LineBorder(Color.BLACK, 1));
+        grid_panel.setBorder(new LineBorder(Color.GRAY, 1));
         grid_panel.setPreferredSize(new Dimension(grid_width, grid_height));
 
         // South panel
         JPanel south_panel = new JPanel(new GridLayout(1, 1, 0, 0));
-        south_panel.setBorder(new LineBorder(Color.BLACK, 1));
         south_panel.setPreferredSize(new Dimension(width, 170));
 
         // East panel
-        JPanel east_panel = new JPanel(new GridLayout(1, 2, 0, 0));
-        east_panel.setBorder(new LineBorder(Color.BLACK, 1));
+        JPanel east_panel = new JPanel(new FlowLayout(FlowLayout.CENTER, width-grid_width, 10));
+        east_panel.setBorder(new LineBorder(Color.GRAY, 1));
         east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
 
         // Populate grid_panel
@@ -89,17 +88,44 @@ public class GUI extends JFrame {
         grid_panel.add(gridDisplay);
 
         // Populate east panel
-        JButton start = new JButton("Start");
-        JButton stop = new JButton("Stop");
-        east_panel.add(start);
-        east_panel.add(stop);
+        JButton start           = new JButton("Start");
+        JButton stop            = new JButton("Stop");
+        JTextField sizeField    = new JTextField(5);
+        JTextField rulesField   = new JTextField(5);
+        JTextField rulesField2  = new JTextField(5);
+        JButton plusSize        = new JButton("+");
+        JButton minusSize       = new JButton("-");
+        JCheckBox grillCheckbox = new JCheckBox("Draw grill");
+
+        sizeField.setEditable(false);
+        grillCheckbox.setSelected(true);
+
+        JPanel panel1 = new JPanel(new GridLayout(1, 2, 10, 0));
+        panel1.setPreferredSize(new Dimension(400, 100));
+        panel1.add(start);
+        panel1.add(stop);
+
+        JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel2.add(new JLabel("Cell size"));
+        panel2.add(sizeField);
+        panel2.add(plusSize);
+        panel2.add(minusSize);
+
+        JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel3.add(new JLabel("Rules"));
+        panel3.add(rulesField);
+        panel3.add(new JLabel("/"));
+        panel3.add(rulesField2);
+        
+        east_panel.add(panel2);
+        east_panel.add(grillCheckbox);
+        east_panel.add(panel3);
+        east_panel.add(panel1);
 
         // Populate south panel
         logArea = new JTextArea(5, 20);
-        JScrollPane scrollPane = new JScrollPane(logArea); 
-        scrollPane.setVerticalScrollBarPolicy(
-                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        //scrollPane.setPreferredSize();
+        logArea.append("Click the Start button to start the automaton" + newline);
+        JScrollPane scrollPane = new JScrollPane(logArea);
         logArea.setEditable(false);
         south_panel.add(scrollPane);
 
@@ -116,7 +142,7 @@ public class GUI extends JFrame {
         open.addActionListener(new menuBarListener());
         save.addActionListener(new menuBarListener());
         quit.addActionListener(new menuBarListener());
-        this.addWindowListener(new frameListener());
+        this.addWindowListener(new windowListener());
 
         grid_panel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -143,12 +169,31 @@ public class GUI extends JFrame {
                 }
             }
         });
+
+        grillCheckbox.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                gridDisplay.toggleGrill();
+            }
+        });
+
+        plusSize.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                gridDisplay.setSquareSize(gridDisplay.getSquareSize() + 1);
+            }
+        });
+
+        minusSize.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                gridDisplay.setSquareSize(gridDisplay.getSquareSize() - 1);
+            }
+        });
+
     }
-    
+
     /**
      * This listener handles the application window events
      */
-    class frameListener extends WindowAdapter {
+    class windowListener extends WindowAdapter {
         public void windowClosing(WindowEvent e) {
             quit();
         }
