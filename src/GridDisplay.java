@@ -20,7 +20,6 @@ public class GridDisplay extends JPanel {
 
     private int drawGrill = 1;
     private int squareSize = 20;
-
     private int repaintInterval = 16;
 
     private int size, center;
@@ -40,7 +39,7 @@ public class GridDisplay extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Draw the grid
+        // Draw the grill
         if (drawGrill == 1) {
             g.setColor(new Color(100, 100, 100));
             int pos;

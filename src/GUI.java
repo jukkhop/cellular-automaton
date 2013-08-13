@@ -5,6 +5,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
 import javax.swing.border.*;
 import javax.swing.filechooser.*;
 import java.io.File;
@@ -21,27 +23,27 @@ public class GUI extends JFrame {
     final static int width = 1280;
     final static int height = 960;
 
-    final static int grid_width = 720;
-    final static int grid_height = 720;
+    final int grid_width = 720;
+    final int grid_height = 720;
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
     private JButton start, stop, applyRules;
     private JTextArea logArea;
-    private JTextField sizeField, rulesField, rulesField2;
+    private numberField sizeField, rulesField, rulesField2;
 
     boolean changesMade = false;
     
     /** Save folder path */
     private final String savePath = "./save";
 
+    private final String newline = "\n";
+
     /** */
     private static Automaton automaton;
 
     /** */
     private static GridDisplay gridDisplay;
-
-    private final static String newline = "\n";
 
     public GUI() {
         JMenuBar menuBar = new JMenuBar();
@@ -74,33 +76,31 @@ public class GUI extends JFrame {
         JPanel grid_panel = new JPanel(new GridLayout(1, 1, 0, 0));
         grid_panel.setBorder(new LineBorder(Color.GRAY, 1));
         grid_panel.setPreferredSize(new Dimension(grid_width, grid_height));
+        grid_panel.setMaximumSize(new Dimension(grid_width, grid_height));
 
         // South panel
-        JPanel south_panel = new JPanel(new GridLayout(1, 1, 0, 0));
-        south_panel.setPreferredSize(new Dimension(width, 170));
+        JPanel log_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        log_panel.setPreferredSize(new Dimension(width, 170));
 
-        // East panel
-        JPanel east_panel = new JPanel(new FlowLayout(FlowLayout.CENTER, width-grid_width, 10));
-        east_panel.setBorder(new LineBorder(Color.GRAY, 1));
-        east_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
+        // Settings panel
+        JPanel settings_panel = new JPanel(new FlowLayout(FlowLayout.CENTER, width-grid_width, 10));
+        settings_panel.setBorder(new LineBorder(Color.GRAY, 1));
+        settings_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
 
-        // Populate grid_panel
+        // Populate grid panel
         gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
         grid_panel.add(gridDisplay);
 
-        // Populate east panel
+        // Populate settings panel
         start = new JButton("Start");
         stop  = new JButton("Stop");
-        sizeField   = new JTextField(4);    
-        rulesField  = new JTextField(4);
-        rulesField2 = new JTextField(4);
+        sizeField   = new numberField(4);    
+        rulesField  = new numberField(4);
+        rulesField2 = new numberField(4);
         applyRules  = new JButton("Apply");
         JButton plusSize        = new JButton("+");
         JButton minusSize       = new JButton("-");
         JCheckBox grillCheckbox = new JCheckBox("Draw grill");
-
-        sizeField.setEditable(false);
-        grillCheckbox.setSelected(true);
 
         JPanel panel1 = new JPanel(new GridLayout(1, 2, 10, 0));
         panel1.setPreferredSize(new Dimension(400, 100));
@@ -112,8 +112,7 @@ public class GUI extends JFrame {
         panel2.add(sizeField);
         panel2.add(plusSize);
         panel2.add(minusSize);
-        sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
-
+        
         JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel3.add(new JLabel("Rules: "));
         panel3.add(new JLabel("B"));
@@ -121,33 +120,38 @@ public class GUI extends JFrame {
         panel3.add(new JLabel(" S"));
         panel3.add(rulesField2);
         panel3.add(applyRules);
-        automaton.setRules("3", "23");
-        String[] rules = automaton.getRules();
-        rulesField.setText(rules[0]);
-        rulesField2.setText(rules[1]);
         
-        east_panel.add(panel2);
-        east_panel.add(grillCheckbox);
-        east_panel.add(panel3);
-        east_panel.add(panel1);
+        settings_panel.add(panel2);
+        settings_panel.add(grillCheckbox);
+        settings_panel.add(panel3);
+        settings_panel.add(panel1);
 
-        // Populate south panel
+        // Populate log panel
         logArea = new JTextArea(5, 20);
-        logArea.append("Click the Start button to start the automaton" + newline);
         JScrollPane scrollPane = new JScrollPane(logArea);
-        logArea.setEditable(false);
-        south_panel.add(scrollPane);
+        log_panel.add(scrollPane);
 
         // Populate main panel
         main_panel.add(grid_panel, BorderLayout.WEST);
-        main_panel.add(south_panel, BorderLayout.SOUTH);
-        main_panel.add(east_panel, BorderLayout.EAST);
+        main_panel.add(log_panel, BorderLayout.SOUTH);
+        main_panel.add(settings_panel, BorderLayout.EAST);
 
         // Populate frame
         setJMenuBar(menuBar);
         add(main_panel);
 
-        // Listeners
+        // Set initial conditions
+        logArea.setEditable(false);
+        logArea.append("Click the Start button to start the automaton" + newline);
+        sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
+        sizeField.setEditable(false);
+        grillCheckbox.setSelected(true);
+        automaton.setRules("3", "23");
+        String[] rules = automaton.getRules();
+        rulesField.setText(rules[0]);
+        rulesField2.setText(rules[1]);
+
+        // Set listeners
         open.addActionListener(new menuBarListener());
         save.addActionListener(new menuBarListener());
         quit.addActionListener(new menuBarListener());
@@ -201,12 +205,42 @@ public class GUI extends JFrame {
             }
         });
 
+        rulesField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { check(e); }
+            public void removeUpdate(DocumentEvent e) { check(e); }
+            public void insertUpdate(DocumentEvent e) { check(e); }
+            public void check(DocumentEvent e) {
+                String s = rulesField.getText();
+                s = s.replaceAll( "[^\\d]", "" );
+                rulesField.setText(s);
+            }
+        });
+
         applyRules.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 automaton.setRules(rulesField.getText(), rulesField2.getText());
             }
         });
 
+    }
+
+    /**
+     * This class implements a text field that allows numeric input only
+     */
+    class numberField extends JTextField {
+        numberField(int s) {
+            super(s);
+            PlainDocument doc = new PlainDocument();
+            doc.setDocumentFilter(new DocumentFilter() {
+                public void insertString(FilterBypass fb, int off, String str, AttributeSet attr) throws BadLocationException {
+                    fb.insertString(off, str.replaceAll("\\D++", ""), attr);  // remove non-digits
+                }
+                public void replace(FilterBypass fb, int off, int len, String str, AttributeSet attr) throws BadLocationException {
+                    fb.replace(off, len, str.replaceAll("\\D++", ""), attr);  // remove non-digits
+                }
+            });
+            this.setDocument(doc);
+        }
     }
 
     /**

@@ -17,9 +17,9 @@ public class Automaton {
     public static final int ON  = 1;
     public static final int OFF = 0; 
 
-    private int state        = OFF;
+    private int state = OFF;
     private int tickInterval = 400;
-    private int tickCount    = 0;
+    private int tickCount = 0;
 
     // Cells in the automaton
     private ArrayList<Cell> cells;
@@ -65,7 +65,7 @@ public class Automaton {
     public void spawnCell(int x, int y) {
         boolean exists = false;
         for (Cell cell : cells) {
-            if (x == cell.x && y == cell.y) {
+            if (x==cell.x && y==cell.y) {
                 cell.state = Cell.ALIVE;
                 exists = true;
             }
@@ -158,10 +158,4 @@ public class Automaton {
         }
         return false;
     }
-
-    public int getState() {
-        return state;
-    }
-
-
 }
