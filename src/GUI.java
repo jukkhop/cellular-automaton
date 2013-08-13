@@ -11,7 +11,6 @@ import javax.swing.border.*;
 import javax.swing.filechooser.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * .
@@ -28,7 +27,7 @@ public class GUI extends JFrame {
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
-    private JButton start, stop, applyRules;
+    private JButton start, stop, applyRules, randomize, reset;
     private JTextArea logArea;
     private numberField sizeField, rulesField, rulesField2;
 
@@ -94,6 +93,8 @@ public class GUI extends JFrame {
         // Populate settings panel
         start = new JButton("Start");
         stop  = new JButton("Stop");
+        randomize = new JButton("Randomize");
+        reset     = new JButton("Reset");
         sizeField   = new numberField(4);    
         rulesField  = new numberField(4);
         rulesField2 = new numberField(4);
@@ -120,11 +121,16 @@ public class GUI extends JFrame {
         panel3.add(new JLabel(" S"));
         panel3.add(rulesField2);
         panel3.add(applyRules);
+
+        JPanel panel4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel4.add(reset);
+        panel4.add(randomize);
         
         settings_panel.add(panel2);
         settings_panel.add(grillCheckbox);
         settings_panel.add(panel3);
         settings_panel.add(panel1);
+        settings_panel.add(panel4);
 
         // Populate log panel
         logArea = new JTextArea(5, 20);
@@ -171,6 +177,8 @@ public class GUI extends JFrame {
                     logArea.append("Simulation already running." + newline);
                 }
                 applyRules.setEnabled(false);
+                reset.setEnabled(false);
+                randomize.setEnabled(false);
             }
         });
 
@@ -182,6 +190,8 @@ public class GUI extends JFrame {
                     logArea.append("Simulation already stopped." + newline);
                 }
                 applyRules.setEnabled(true);
+                reset.setEnabled(true);
+                randomize.setEnabled(true);
             }
         });
 
@@ -219,9 +229,32 @@ public class GUI extends JFrame {
         applyRules.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 automaton.setRules(rulesField.getText(), rulesField2.getText());
+                logArea.append("Rules applied." + newline);
             }
         });
 
+        reset.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                automaton.getCells().clear();
+                logArea.append("Cells reseted." + newline);
+            }
+        });
+
+        randomize.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int sqSize = gridDisplay.getSquareSize();
+                int size = grid_width / sqSize;
+                int center = size/2;
+                int r;
+                for (int i=0-center ; i<center ; i++) {
+                    for (int j=0-center ; j<center ; j++) {
+                        r = (int) Math.round(Math.random());
+                        if (r == 1) toggleCellState(i, j);
+                    }
+                }
+                logArea.append("Cell states randomized." + newline);
+            }
+        });
     }
 
     /**
@@ -266,7 +299,10 @@ public class GUI extends JFrame {
     void gridClicked(MouseEvent e) {
         int x = gridDisplay.coordToPos(e.getX());
         int y = gridDisplay.coordToPos(e.getY());
+        toggleCellState(x, y);
+    }
 
+    void toggleCellState(int x, int y) {
         Cell c = automaton.getCellAt(x, y);
         if (c==null || c.state==Cell.DEAD) {
             automaton.spawnCell(x, y);
