@@ -90,8 +90,7 @@ public class GridDisplay extends JPanel {
     }
 
     public void toggleGrill() {
-        if (drawGrill == 1) drawGrill = 0;
-        else drawGrill = 1;
+        drawGrill = (drawGrill==1) ? 0 : 1;
     }
  
 }

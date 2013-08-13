@@ -18,17 +18,48 @@ public class Automaton {
     public static final int OFF = 0; 
 
     private int state        = OFF;
-    private int tickInterval = 360;
+    private int tickInterval = 400;
     private int tickCount    = 0;
 
     // Cells in the automaton
     private ArrayList<Cell> cells;
+
+    // Cell Birth/Survival rules (bitmasked)
+    private int B_RULE, S_RULE;
+    private static final int[] FLAGS = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 
     // 
     private Timer timer;
 
     public Automaton() {
         cells = new ArrayList<Cell>();
+    }
+
+    public void setRules(String B, String S) {
+        B_RULE = maskRules(B);
+        S_RULE = maskRules(S);
+    }
+
+    public String[] getRules() {
+        return new String[]{unmaskRules(B_RULE), unmaskRules(S_RULE)};
+    }
+
+    private int maskRules(String r) {
+        int m = 0;
+        int n;
+        for (char c : r.toCharArray()) {
+             n = Math.max(Math.min(Character.getNumericValue(c), 8), 0);
+             m += FLAGS[n];
+        }
+        return m;
+    }
+
+    private String unmaskRules(int r) {
+        String s = "";
+        for (int i=0 ; i<=8 ; i++) {
+            if ((r & FLAGS[i]) != 0) s += i;
+        }
+        return s;
     }
 
     public void spawnCell(int x, int y) {
@@ -63,10 +94,10 @@ public class Automaton {
         for (Cell cell : cells) {
             int n = countNeighbours(cell);
             if (cell.state == Cell.ALIVE) {
-                cell.nextState = (n<2 || n>3) ? Cell.DEAD : Cell.ALIVE;
+                cell.nextState = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
             }
             if (cell.state == Cell.DEAD) {
-                cell.nextState = (n == 3) ? Cell.ALIVE : Cell.DEAD;
+                cell.nextState = ((B_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
             }
         }
 
@@ -74,7 +105,7 @@ public class Automaton {
         for (Cell cell : cells) cells2.add(cell);
 
         for (Cell cell : cells2) {
-            if (cell.state == Cell.DEAD && cell.nextState == Cell.ALIVE) {
+            if (cell.state==Cell.DEAD && cell.nextState==Cell.ALIVE) {
                 spawnCell(cell.x, cell.y);
             }
             cell.state = cell.nextState;
@@ -84,7 +115,7 @@ public class Automaton {
     private int countNeighbours(Cell c) {
         int n = 0;
         for (Cell cell : cells) {
-            if (cell == c || cell.state == Cell.DEAD) continue;
+            if (cell==c || cell.state==Cell.DEAD) continue;
             int xd = cell.x - c.x;
             int yd = cell.y - c.y;
             if (Math.sqrt(xd*xd + yd*yd) < 2) n++;
@@ -126,6 +157,10 @@ public class Automaton {
             return true;
         }
         return false;
+    }
+
+    public int getState() {
+        return state;
     }
 
 

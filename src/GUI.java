@@ -26,8 +26,9 @@ public class GUI extends JFrame {
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
-    private JButton start, stop;
+    private JButton start, stop, applyRules;
     private JTextArea logArea;
+    private JTextField sizeField, rulesField, rulesField2;
 
     boolean changesMade = false;
     
@@ -88,11 +89,12 @@ public class GUI extends JFrame {
         grid_panel.add(gridDisplay);
 
         // Populate east panel
-        JButton start           = new JButton("Start");
-        JButton stop            = new JButton("Stop");
-        JTextField sizeField    = new JTextField(5);
-        JTextField rulesField   = new JTextField(5);
-        JTextField rulesField2  = new JTextField(5);
+        start = new JButton("Start");
+        stop  = new JButton("Stop");
+        sizeField   = new JTextField(4);    
+        rulesField  = new JTextField(4);
+        rulesField2 = new JTextField(4);
+        applyRules  = new JButton("Apply");
         JButton plusSize        = new JButton("+");
         JButton minusSize       = new JButton("-");
         JCheckBox grillCheckbox = new JCheckBox("Draw grill");
@@ -110,12 +112,19 @@ public class GUI extends JFrame {
         panel2.add(sizeField);
         panel2.add(plusSize);
         panel2.add(minusSize);
+        sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
 
         JPanel panel3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel3.add(new JLabel("Rules"));
+        panel3.add(new JLabel("Rules: "));
+        panel3.add(new JLabel("B"));
         panel3.add(rulesField);
-        panel3.add(new JLabel("/"));
+        panel3.add(new JLabel(" S"));
         panel3.add(rulesField2);
+        panel3.add(applyRules);
+        automaton.setRules("3", "23");
+        String[] rules = automaton.getRules();
+        rulesField.setText(rules[0]);
+        rulesField2.setText(rules[1]);
         
         east_panel.add(panel2);
         east_panel.add(grillCheckbox);
@@ -157,6 +166,7 @@ public class GUI extends JFrame {
                 } else {
                     logArea.append("Simulation already running." + newline);
                 }
+                applyRules.setEnabled(false);
             }
         });
 
@@ -167,6 +177,7 @@ public class GUI extends JFrame {
                 } else {
                     logArea.append("Simulation already stopped." + newline);
                 }
+                applyRules.setEnabled(true);
             }
         });
 
@@ -179,12 +190,20 @@ public class GUI extends JFrame {
         plusSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 gridDisplay.setSquareSize(gridDisplay.getSquareSize() + 1);
+                sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
             }
         });
 
         minusSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 gridDisplay.setSquareSize(gridDisplay.getSquareSize() - 1);
+                sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
+            }
+        });
+
+        applyRules.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                automaton.setRules(rulesField.getText(), rulesField2.getText());
             }
         });
 
