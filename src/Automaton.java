@@ -158,4 +158,12 @@ public class Automaton {
         }
         return false;
     }
+
+    public String toString() {
+        String s = "";
+        for (Cell c : cells) {
+            if (c.state == Cell.ALIVE) s += c.x+" "+c.y+"\n";
+        }
+        return s;
+    }
 }

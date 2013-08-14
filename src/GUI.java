@@ -9,8 +9,8 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
 import javax.swing.filechooser.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 
 /**
  * .
@@ -31,8 +31,6 @@ public class GUI extends JFrame {
     private JTextArea logArea;
     private numberField sizeField, rulesField, rulesField2;
 
-    boolean changesMade = false;
-    
     /** Save folder path */
     private final String savePath = "./save";
 
@@ -156,6 +154,7 @@ public class GUI extends JFrame {
         String[] rules = automaton.getRules();
         rulesField.setText(rules[0]);
         rulesField2.setText(rules[1]);
+        stop.setEnabled(false);
 
         // Set listeners
         open.addActionListener(new menuBarListener());
@@ -168,78 +167,59 @@ public class GUI extends JFrame {
                 gridClicked(e);
             }
         });
-
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (automaton.start()) {
                     logArea.append("Simulation started..." + newline);
-                } else {
-                    logArea.append("Simulation already running." + newline);
                 }
                 applyRules.setEnabled(false);
                 reset.setEnabled(false);
                 randomize.setEnabled(false);
+                start.setEnabled(false);
+                stop.setEnabled(true);
             }
         });
-
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (automaton.stop()) {
                     logArea.append("Simulation stopped." + newline);
-                } else {
-                    logArea.append("Simulation already stopped." + newline);
                 }
                 applyRules.setEnabled(true);
                 reset.setEnabled(true);
                 randomize.setEnabled(true);
+                start.setEnabled(true);
+                stop.setEnabled(false);
             }
         });
-
         grillCheckbox.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 gridDisplay.toggleGrill();
             }
         });
-
         plusSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 gridDisplay.setSquareSize(gridDisplay.getSquareSize() + 1);
                 sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
             }
         });
-
         minusSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 gridDisplay.setSquareSize(gridDisplay.getSquareSize() - 1);
                 sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
             }
         });
-
-        rulesField.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) { check(e); }
-            public void removeUpdate(DocumentEvent e) { check(e); }
-            public void insertUpdate(DocumentEvent e) { check(e); }
-            public void check(DocumentEvent e) {
-                String s = rulesField.getText();
-                s = s.replaceAll( "[^\\d]", "" );
-                rulesField.setText(s);
-            }
-        });
-
         applyRules.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 automaton.setRules(rulesField.getText(), rulesField2.getText());
                 logArea.append("Rules applied." + newline);
             }
         });
-
         reset.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 automaton.getCells().clear();
-                logArea.append("Cells reseted." + newline);
+                logArea.append("Automaton state reseted." + newline);
             }
         });
-
         randomize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int sqSize = gridDisplay.getSquareSize();
@@ -252,7 +232,7 @@ public class GUI extends JFrame {
                         if (r == 1) toggleCellState(i, j);
                     }
                 }
-                logArea.append("Cell states randomized." + newline);
+                logArea.append("Automaton state randomized." + newline);
             }
         });
     }
@@ -314,7 +294,6 @@ public class GUI extends JFrame {
     class MyFileChooser extends JFileChooser {
         MyFileChooser() {
             super();
-            
             if (checkDirectory()) {
                 setCurrentDirectory(new File(savePath));
             }
@@ -329,7 +308,6 @@ public class GUI extends JFrame {
      */
     private boolean checkDirectory() {
         File folder = new File(savePath);
-
         if (!folder.exists()) {
             try {
                 folder.mkdir();
@@ -337,37 +315,27 @@ public class GUI extends JFrame {
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(GUI.this,
-                "Check that you have write permissions to the folder, " +
+                "Check that you have write permissions to the folder " +
                 "that you are running for program from.",
                 "Folder could not be created!",
                 JOptionPane.ERROR_MESSAGE);
-                
                 return false;
             }
-
         } else return true;
     }
 
     private void open() {
-        if (changesMade) {
-            int option = JOptionPane.showOptionDialog(null, 
-            "You have unsaved changes - are you sure you want to quit?", 
-            "Confirm quit", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.QUESTION_MESSAGE,
-            null, new String[] {"Yes", "No"}, null);
-            
-            if (option == JOptionPane.YES_OPTION) {
-                save();
-            }
-        }
-        
-        int option2 = fileChooser.showOpenDialog(GUI.this);
-        if (option2 == JFileChooser.APPROVE_OPTION) {
-            /*
+        int option = fileChooser.showOpenDialog(GUI.this);
+        if (option == JFileChooser.APPROVE_OPTION) {
             try {
-                fileChooser.getSelectedFile();
-                changesMade = false;
+                File file = fileChooser.getSelectedFile();
+                Scanner sc = new Scanner(file);
+                automaton.getCells().clear();
+                while (sc.hasNextLine()) {
+                    automaton.spawnCell(sc.nextInt(), sc.nextInt());
+                    sc.nextLine();
+                }
+                logArea.append("Automaton state read from " + file + newline);
 
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(GUI.this,
@@ -375,14 +343,7 @@ public class GUI extends JFrame {
                 "and that the file is valid.",
                 "Error opening file!",
                 JOptionPane.ERROR_MESSAGE);
-
-            } catch (ClassNotFoundException ex) {
-                JOptionPane.showMessageDialog(GUI.this,
-                "",
-                "Ohjelmasta puuttuu tiedostoja!",
-                JOptionPane.WARNING_MESSAGE);
             }
-            */
         }
     }
     
@@ -390,68 +351,48 @@ public class GUI extends JFrame {
         boolean ready = false;
         int option;
         File file = null;
-        String path;
         
         while (!ready) {
             option = fileChooser.showSaveDialog(GUI.this);
-            
             if (option == JFileChooser.APPROVE_OPTION) {
                 file = fileChooser.getSelectedFile();
-                path = file.getAbsolutePath();
 
                 if (file.exists()) {
                     option = JOptionPane.showOptionDialog(GUI.this, 
                     file.getName() + " already exists - do you want to replace it?", 
-                    "Confirm overwrite", 
+                    "Confirm file overwrite", 
                     JOptionPane.YES_NO_OPTION, 
                     JOptionPane.QUESTION_MESSAGE,
                     null, new String[] {"Yes", "No"}, null);
 
-                    if (option == JOptionPane.YES_OPTION) {
-                        ready = true;
-                    }
+                    if (option == JOptionPane.YES_OPTION) ready = true;
                 }
                 else ready = true;
             }
             else return;
         }
-        
-        /*
+
         try {
-            changesMade = false;
+            PrintWriter writer = new PrintWriter(file);
+            writer.print(automaton.toString());
+            writer.close();
+            logArea.append("Automaton state written to " + file + newline);
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(GUI.this,
-            "Varmista, että sinulla on kirjoitusoikeudet hakemistoon, " +
-            "johon yritit tallentaa.",
-            "Virhe kirjoittaessa tiedostoa!",
+            "Ensure that you have read permissions to the file " +
+            "you were trying to write to.",
+            "Error while writing file!",
             JOptionPane.ERROR_MESSAGE);
         }
-        */
     }
 
-    /** 
-     * Closes the application, asking confirmation if necessary.
-     */
+    /** Closes the application. */
     private void quit() {
-        if (changesMade) {
-            int option = JOptionPane.showOptionDialog(GUI.this, 
-            "Changes have not been saved - are you sure you want to quit?", 
-            "Confirm quit", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.QUESTION_MESSAGE,
-            null, new String[] {"Yes", "No"}, null);
-
-            if (option == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            }
-
-        } else System.exit(0);
+        System.exit(0);
     }
     
-    /** 
-     * This method creates and shows the application window.
-     */
+    /** This method creates and shows the application window. */
     private static void createAndShowGUI() {
         GUI frame = new GUI();
         frame.setTitle("Cellular automaton");
@@ -471,7 +412,7 @@ public class GUI extends JFrame {
             }
         });
 
-        // Create the automaton
+        // Initialize the automaton
         automaton = new Automaton();
     }
 }

@@ -69,7 +69,6 @@ public class GridDisplay extends JPanel {
 
     public void setSquareSize(int squareSize) {
         if (squareSize < 1) squareSize = 1;
-
         this.squareSize = squareSize;
         size = width / squareSize;
         center = size/2;
