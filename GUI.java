@@ -51,8 +51,8 @@ public class GUI extends JFrame {
         fileMenu.setMnemonic(KeyEvent.VK_T);
         
         // Items for File menu
-        open = new JMenuItem("Open", new ImageIcon("../img/open.gif"));
-        save = new JMenuItem("Save", new ImageIcon("../img/save.gif"));
+        open = new JMenuItem("Open", new ImageIcon("img/open.gif"));
+        save = new JMenuItem("Save", new ImageIcon("img/save.gif"));
         quit = new JMenuItem("Quit");
         open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -70,29 +70,28 @@ public class GUI extends JFrame {
         main_panel.setBorder(new EmptyBorder(8, 8, 8, 8));
         
         // Grid panel
-        JPanel grid_panel = new JPanel(new GridLayout(1, 1, 0, 0));
+        JPanel grid_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        grid_panel.setPreferredSize(new Dimension(grid_width+2, grid_height));
         grid_panel.setBorder(new LineBorder(Color.GRAY, 1));
-        grid_panel.setPreferredSize(new Dimension(grid_width, grid_height));
-        grid_panel.setMaximumSize(new Dimension(grid_width, grid_height));
 
-        // South panel
+        // Log panel
         JPanel log_panel = new JPanel(new GridLayout(1, 1, 0, 0));
-        log_panel.setPreferredSize(new Dimension(width, 170));
+        log_panel.setPreferredSize(new Dimension(width, 168));
 
         // Settings panel
         JPanel settings_panel = new JPanel(new FlowLayout(FlowLayout.CENTER, width-grid_width, 10));
         settings_panel.setBorder(new LineBorder(Color.GRAY, 1));
-        settings_panel.setPreferredSize(new Dimension(width-grid_width-22, 700));
+        settings_panel.setPreferredSize(new Dimension(width-grid_width-24, 700));
 
         // Populate grid panel
         gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
         grid_panel.add(gridDisplay);
 
         // Populate settings panel
-        start = new JButton("Start");
-        stop  = new JButton("Stop");
-        randomize = new JButton("Randomize");
-        reset     = new JButton("Reset");
+        start       = new JButton("Start");
+        stop        = new JButton("Stop");
+        randomize   = new JButton("Randomize");
+        reset       = new JButton("Reset");
         sizeField   = new numberField(4);    
         rulesField  = new numberField(4);
         rulesField2 = new numberField(4);
@@ -162,7 +161,7 @@ public class GUI extends JFrame {
         quit.addActionListener(new menuBarListener());
         this.addWindowListener(new windowListener());
 
-        grid_panel.addMouseListener(new MouseAdapter() {
+        gridDisplay.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 gridClicked(e);
             }
@@ -238,7 +237,7 @@ public class GUI extends JFrame {
     }
 
     /**
-     * This class implements a text field that allows numeric input only
+     * This class implements a numeric input only field
      */
     class numberField extends JTextField {
         numberField(int s) {
@@ -257,7 +256,7 @@ public class GUI extends JFrame {
     }
 
     /**
-     * This listener handles the application window events
+     * This listener handles the window events
      */
     class windowListener extends WindowAdapter {
         public void windowClosing(WindowEvent e) {
@@ -341,7 +340,7 @@ public class GUI extends JFrame {
                 JOptionPane.showMessageDialog(GUI.this,
                 "Ensure that you have read permissions to the file " +
                 "and that the file is valid.",
-                "Error opening file!",
+                "Error in opening file!",
                 JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -382,7 +381,7 @@ public class GUI extends JFrame {
             JOptionPane.showMessageDialog(GUI.this,
             "Ensure that you have read permissions to the file " +
             "you were trying to write to.",
-            "Error while writing file!",
+            "Error in writing file!",
             JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -392,7 +391,7 @@ public class GUI extends JFrame {
         System.exit(0);
     }
     
-    /** This method creates and shows the application window. */
+    /** This method creates and shows the application frame. */
     private static void createAndShowGUI() {
         GUI frame = new GUI();
         frame.setTitle("Cellular automaton");

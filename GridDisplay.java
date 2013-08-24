@@ -30,6 +30,7 @@ public class GridDisplay extends JPanel {
         this.cells  = cells;
 
         setSquareSize(squareSize);
+        setPreferredSize(new Dimension(width, height));
         setBackground(Color.WHITE);
 
         Timer timer = new Timer(repaintInterval, new TimerListener());
