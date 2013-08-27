@@ -10,7 +10,7 @@ import javax.swing.text.*;
 import javax.swing.border.*;
 import javax.swing.filechooser.*;
 import java.io.*;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * .
@@ -84,7 +84,7 @@ public class GUI extends JFrame {
         settings_panel.setPreferredSize(new Dimension(width-grid_width-24, 700));
 
         // Populate grid panel
-        gridDisplay = new GridDisplay(grid_width, grid_height, automaton.getCells());
+        gridDisplay = new GridDisplay(grid_width, grid_height, automaton);
         grid_panel.add(gridDisplay);
 
         // Populate settings panel
@@ -188,6 +188,23 @@ public class GUI extends JFrame {
                 randomize.setEnabled(true);
                 start.setEnabled(true);
                 stop.setEnabled(false);
+                
+                /* try {
+                    java.util.List sortedKeys = new ArrayList(automaton.stats.keySet());
+                    Collections.sort(sortedKeys);
+                    PrintWriter writer = new PrintWriter(new File("stats"));
+                    writer.print("[[\"Execution time\",");
+                    for (Object o : sortedKeys) {
+                        int key = (int) o;
+                        double value = automaton.stats.get(key);
+
+                        writer.print("[" + key + "," + value + "],");
+                    }
+                    writer.print("]]");
+                    writer.close();
+
+                } catch (IOException ex) { }
+                */
             }
         });
         grillCheckbox.addItemListener(new ItemListener() {
@@ -215,7 +232,7 @@ public class GUI extends JFrame {
         });
         reset.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                automaton.getCells().clear();
+                automaton.reset();
                 logArea.append("Automaton state reseted." + newline);
             }
         });
@@ -288,8 +305,8 @@ public class GUI extends JFrame {
         } else {
             c.state = Cell.DEAD;
         }
-    }
-    
+    }    
+
     class MyFileChooser extends JFileChooser {
         MyFileChooser() {
             super();

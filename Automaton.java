@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.HashMap;
 
 /**
  * .
@@ -15,13 +17,16 @@ import java.util.ArrayList;
 public class Automaton {
 
     public static final int ON  = 1;
-    public static final int OFF = 0; 
+    public static final int OFF = 0;
 
     private int state = OFF;
     private int tickInterval = 400;
     private int tickCount = 0;
 
-    // Cells in the automaton
+    // A map of all cells in the automaton
+    HashMap<Coords, Cell> cellMap;
+
+    // List of alive cells
     private ArrayList<Cell> cells;
 
     // Cell Birth/Survival rules (bitmasked)
@@ -31,20 +36,114 @@ public class Automaton {
     // 
     private Timer timer;
 
+    // Benchmark
+    //public HashMap<Integer, Double> stats = new HashMap<Integer, Double>();
+    //long start, stop;
+
     public Automaton() {
+        cellMap = new HashMap<Coords, Cell>();
         cells = new ArrayList<Cell>();
     }
 
+    private Cell addCell(int x, int y, int state) {
+        Cell c = new Cell(x, y, state);
+        cellMap.put(new Coords(x, y), c);
+        return c;
+    }
+
+    public void spawnCell(int x, int y) {
+        Cell c = getCellAt(x, y);
+        if (c == null) {
+            c = addCell(x, y, Cell.ALIVE);
+        } else {
+            c.state = Cell.ALIVE;
+        }
+        cells.add(c);
+    }
+
+    private void tick() {
+        //start = System.currentTimeMillis();
+
+        tickCount++;
+
+        ArrayList<Cell> changingCells = new ArrayList<Cell>();
+        ArrayList<Cell> aliveCells = new ArrayList<Cell>();
+
+        for (Cell cell : cells) {
+            ArrayList<Cell> block = getNeighbours(cell);
+            block.add(cell);
+            
+            for (Cell c : block) {
+                if (c.age == tickCount) continue;
+
+                c.nextState = getNextState(c);
+                c.age = tickCount;
+
+                if (c.state != c.nextState)
+                    changingCells.add(c);
+
+                if (c.nextState == Cell.ALIVE)
+                    aliveCells.add(c);
+            }
+        }
+
+        // Change the necessary cell states
+        for (Cell c : changingCells) c.state = c.nextState;
+
+        // Replace cells with those that will be alive next gen
+        cells = aliveCells;
+
+        //stop = System.currentTimeMillis();
+        //sstats.put(aliveCells.size(), (1.0*stop-start));
+    }
+
+    private int getNextState(Cell c) {
+        int n = countNeighbours(c);
+        int nextState = -1;
+        if (c.state == Cell.ALIVE)
+            nextState = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
+        
+        if (c.state == Cell.DEAD)
+            nextState = ((B_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
+
+        return nextState;
+    }
+
+    private ArrayList<Cell> getNeighbours(Cell c) {
+        ArrayList<Cell> neighs = new ArrayList<Cell>(8);
+
+        for (int[] coords : c.neighCoords) {
+            Cell n = getCellAt(coords[0], coords[1]);
+            if (n == null)
+                n = addCell(coords[0], coords[1], Cell.DEAD);
+
+            neighs.add(n);
+        }
+        return neighs;
+    }
+
+    private int countNeighbours(Cell c) {
+        int n = 0;
+        for (Cell neigh : getNeighbours(c)) {
+            if (neigh.state == Cell.ALIVE) n++;
+        }
+        return n;
+    }
+
+    public Cell getCellAt(int x, int y) {
+        return cellMap.get(new Coords(x, y));
+    }
+
     public void setRules(String B, String S) {
-        B_RULE = maskRules(B);
-        S_RULE = maskRules(S);
+        B_RULE = maskRule(B);
+        S_RULE = maskRule(S);
     }
 
     public String[] getRules() {
-        return new String[]{unmaskRules(B_RULE), unmaskRules(S_RULE)};
+        return new String[]{unmaskRule(B_RULE), unmaskRule(S_RULE)};
     }
 
-    private int maskRules(String r) {
+    private int maskRule(String r) {
         int m = 0;
         int n;
         for (char c : r.toCharArray()) {
@@ -54,84 +153,12 @@ public class Automaton {
         return m;
     }
 
-    private String unmaskRules(int r) {
+    private String unmaskRule(int r) {
         String s = "";
-        for (int i=0 ; i<=8 ; i++) {
+        for (int i=0; i<=8; i++)
             if ((r & FLAGS[i]) != 0) s += i;
-        }
+        
         return s;
-    }
-
-    public void spawnCell(int x, int y) {
-        boolean exists = false;
-        for (Cell cell : cells) {
-            if (x==cell.x && y==cell.y) {
-                cell.state = Cell.ALIVE;
-                exists = true;
-            }
-        }
-        if (!exists) cells.add(new Cell(x, y, Cell.ALIVE));
-
-        int[][] neighs = {  {x, y-1}, {x+1, y-1}, {x+1, y}, {x+1, y+1},
-                            {x, y+1}, {x-1, y+1}, {x-1, y}, {x-1, y-1}
-                         };
-
-        for (int i=0 ; i<neighs.length ; i++) {
-            exists = false;
-            for (Cell cell : cells) {
-                if (neighs[i][0] == cell.x && neighs[i][1] == cell.y) {
-                    exists = true;
-                }
-            }
-            if (!exists) {
-                cells.add(new Cell(neighs[i][0], neighs[i][1], Cell.DEAD));
-            }
-        }
-    }
-
-    private void tick() {
-        tickCount++;
-        for (Cell cell : cells) {
-            int n = countNeighbours(cell);
-            if (cell.state == Cell.ALIVE) {
-                cell.nextState = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
-            }
-            if (cell.state == Cell.DEAD) {
-                cell.nextState = ((B_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
-            }
-        }
-
-        ArrayList<Cell> cells2 = new ArrayList<Cell>();
-        for (Cell cell : cells) cells2.add(cell);
-
-        for (Cell cell : cells2) {
-            if (cell.state==Cell.DEAD && cell.nextState==Cell.ALIVE) {
-                spawnCell(cell.x, cell.y);
-            }
-            cell.state = cell.nextState;
-        }
-    }
-
-    private int countNeighbours(Cell c) {
-        int n = 0;
-        for (Cell cell : cells) {
-            if (cell==c || cell.state==Cell.DEAD) continue;
-            int xd = cell.x - c.x;
-            int yd = cell.y - c.y;
-            if (Math.sqrt(xd*xd + yd*yd) < 2) n++;
-        }
-        return n;
-    }
-
-    public ArrayList<Cell> getCells() {
-        return cells;
-    }
-
-    public Cell getCellAt(int x, int y) {
-        for (Cell c : cells) {
-            if (c.x==x && c.y==y) return c;
-        }
-        return null;
     }
 
     class TimerListener implements ActionListener {
@@ -159,11 +186,44 @@ public class Automaton {
         return false;
     }
 
+    public ArrayList<Cell> getCells() {
+        return cells;
+    }
+
+    public void reset() {
+        cellMap.clear();
+        cells.clear();
+        tickCount = 0;
+    }
+
+    public int getTickCount() {
+        return tickCount;
+    }
+
     public String toString() {
         String s = "";
-        for (Cell c : cells) {
+        for (Cell c : cells)
             if (c.state == Cell.ALIVE) s += c.x+" "+c.y+"\n";
-        }
+        
         return s;
+    }
+
+    final class Coords {
+        private final int x;
+        private final int y;
+
+        public Coords(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public boolean equals(Object other) {
+            Coords that = (Coords) other;
+            return (this.x==that.x && this.y==that.y); 
+        }
+
+        public int hashCode() {
+            return x * 31 + y;
+        }
     }
 }

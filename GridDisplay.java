@@ -16,7 +16,7 @@ public class GridDisplay extends JPanel {
     
     private int width;
     private int height;
-    private ArrayList<Cell> cells;
+    private Automaton automaton;
 
     private int drawGrill = 1;
     private int squareSize = 20;
@@ -24,10 +24,10 @@ public class GridDisplay extends JPanel {
 
     private int size, center;
 
-    public GridDisplay(int width, int height, ArrayList<Cell> cells) {
-        this.width  = width;
-        this.height = height;
-        this.cells  = cells;
+    public GridDisplay(int width, int height, Automaton automaton) {
+        this.width     = width;
+        this.height    = height;
+        this.automaton = automaton;
 
         setSquareSize(squareSize);
         setPreferredSize(new Dimension(width, height));
@@ -54,12 +54,14 @@ public class GridDisplay extends JPanel {
         // Draw the cells
         g.setColor(Color.BLACK);
         int x, y;
-        for (Cell cell : cells) {
+        for (Cell cell : automaton.getCells()) {
             if (cell.state == Cell.DEAD) continue;
             x = center + cell.x;
             y = center + cell.y;
             g.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
         }
+
+        g.drawString(Integer.toString(automaton.getTickCount()), 10, 10);
     }
 
     class TimerListener implements ActionListener {
