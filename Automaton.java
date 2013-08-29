@@ -69,10 +69,10 @@ public class Automaton {
             
             for (Cell c : block) {
                 if (c.age == tickCount) continue;
-
-                c.nextState = getNextState(c);
                 c.age = tickCount;
 
+                c.nextState = getNextState(c);
+                    
                 if (c.state != c.nextState)
                     changingCells.add(c);
 
