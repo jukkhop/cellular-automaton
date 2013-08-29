@@ -90,7 +90,7 @@ public class Automaton {
 
     private int getNextState(Cell c) {
         int n = countNeighbours(c);
-        int nextState = -1;
+        int nextState = Integer.MIN_VALUE;
         if (c.state == Cell.ALIVE)
             nextState = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
         
