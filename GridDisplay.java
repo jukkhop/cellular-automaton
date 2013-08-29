@@ -61,7 +61,10 @@ public class GridDisplay extends JPanel {
             g.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
         }
 
-        g.drawString(Integer.toString(automaton.getTickCount()), 10, 10);
+        g.setColor(Color.RED);
+        String line = "Generation: " + Integer.toString(automaton.getTickCount()) + 
+                      "     Cells: " + automaton.getCells().size();
+        g.drawString(line, 6, 12);
     }
 
     class TimerListener implements ActionListener {

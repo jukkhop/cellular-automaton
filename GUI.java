@@ -27,20 +27,20 @@ public class GUI extends JFrame {
 
     private MyFileChooser fileChooser = new MyFileChooser();
     private JMenuItem open, save, quit;
-    private JButton start, stop, applyRules, randomize, reset;
+    private JButton start, stop, applyRules, randomize, reset, applyTickInterval;
     private JTextArea logArea;
-    private numberField sizeField, rulesField, rulesField2;
+    private NumberField sizeField, rulesField, rulesField2, tickIntervalField;
 
     /** Save folder path */
     private final String savePath = "./save";
 
-    private final String newline = "\n";
-
-    /** */
+    /** Instance of the cell automaton */
     private static Automaton automaton;
 
-    /** */
+    /** Instance of the panel that draws the cells */
     private static GridDisplay gridDisplay;
+
+    private final String newline = "\n";
 
     public GUI() {
         JMenuBar menuBar = new JMenuBar();
@@ -92,13 +92,15 @@ public class GUI extends JFrame {
         stop        = new JButton("Stop");
         randomize   = new JButton("Randomize");
         reset       = new JButton("Reset");
-        sizeField   = new numberField(4);    
-        rulesField  = new numberField(4);
-        rulesField2 = new numberField(4);
+        sizeField   = new NumberField(4);    
+        rulesField  = new NumberField(4);
+        rulesField2 = new NumberField(4);
         applyRules  = new JButton("Apply");
         JButton plusSize        = new JButton("+");
         JButton minusSize       = new JButton("-");
         JCheckBox grillCheckbox = new JCheckBox("Draw grill");
+        tickIntervalField = new NumberField(5);
+        applyTickInterval = new JButton("Apply");
 
         JPanel panel1 = new JPanel(new GridLayout(1, 2, 10, 0));
         panel1.setPreferredSize(new Dimension(400, 100));
@@ -122,8 +124,14 @@ public class GUI extends JFrame {
         JPanel panel4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel4.add(reset);
         panel4.add(randomize);
-        
+
+        JPanel panel5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel5.add(new JLabel("Tick interval"));
+        panel5.add(tickIntervalField);
+        panel5.add(applyTickInterval);
+
         settings_panel.add(panel2);
+        settings_panel.add(panel5);
         settings_panel.add(grillCheckbox);
         settings_panel.add(panel3);
         settings_panel.add(panel1);
@@ -147,13 +155,13 @@ public class GUI extends JFrame {
         logArea.setEditable(false);
         logArea.append("Click the Start button to start the automaton" + newline);
         sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
-        sizeField.setEditable(false);
         grillCheckbox.setSelected(true);
         automaton.setRules("3", "23");
         String[] rules = automaton.getRules();
         rulesField.setText(rules[0]);
         rulesField2.setText(rules[1]);
         stop.setEnabled(false);
+        setTickInterval();
 
         // Set listeners
         open.addActionListener(new menuBarListener());
@@ -212,6 +220,15 @@ public class GUI extends JFrame {
                 gridDisplay.toggleGrill();
             }
         });
+        sizeField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int s = Integer.parseInt(sizeField.getText());
+                    gridDisplay.setSquareSize(s);
+                } catch (Exception ex) { }
+                sizeField.setText(Integer.toString(gridDisplay.getSquareSize()));
+            }
+        });
         plusSize.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 gridDisplay.setSquareSize(gridDisplay.getSquareSize() + 1);
@@ -251,13 +268,23 @@ public class GUI extends JFrame {
                 logArea.append("Automaton state randomized." + newline);
             }
         });
+        tickIntervalField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                setTickInterval();
+            }
+        });
+        applyTickInterval.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                setTickInterval();
+            }
+        });
     }
 
     /**
      * This class implements a numeric input only field
      */
-    class numberField extends JTextField {
-        numberField(int s) {
+    class NumberField extends JTextField {
+        NumberField(int s) {
             super(s);
             PlainDocument doc = new PlainDocument();
             doc.setDocumentFilter(new DocumentFilter() {
@@ -305,7 +332,17 @@ public class GUI extends JFrame {
         } else {
             c.state = Cell.DEAD;
         }
-    }    
+    }
+
+    void setTickInterval() {
+        try {
+            int i = Integer.parseInt(tickIntervalField.getText());
+            automaton.setTickInterval(i);
+        } catch (Exception ex) { }
+
+        tickIntervalField.setText(Integer.toString(automaton.getTickInterval()));
+        logArea.append("Automaton tick interval set to "+automaton.getTickInterval()+"." + newline);
+    }
 
     class MyFileChooser extends JFileChooser {
         MyFileChooser() {

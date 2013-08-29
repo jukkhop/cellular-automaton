@@ -22,22 +22,19 @@ public class Automaton {
     private int tickInterval = 400;
     private int tickCount = 0;
 
-    // A map of all cells in the automaton
+    /** A map of all cells in the automaton */
     HashMap<Coords, Cell> cellMap;
 
-    // List of alive cells
+    /** List of alive cells */
     private ArrayList<Cell> cells;
 
-    // Cell Birth/Survival rules (bitmasked)
+    /** Cell Birth/Survival rules (bitmasked) */
     private int B_RULE, S_RULE;
+    /** Flags for the rules */
     private static final int[] FLAGS = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 
     // 
     private Timer timer;
-
-    // Benchmark
-    //public HashMap<Integer, Double> stats = new HashMap<Integer, Double>();
-    //long start, stop;
 
     public Automaton() {
         cellMap = new HashMap<Coords, Cell>();
@@ -61,8 +58,6 @@ public class Automaton {
     }
 
     private void tick() {
-        //start = System.currentTimeMillis();
-
         tickCount++;
 
         ArrayList<Cell> changingCells = new ArrayList<Cell>();
@@ -91,9 +86,6 @@ public class Automaton {
 
         // Replace cells with those that will be alive next gen
         cells = aliveCells;
-
-        //stop = System.currentTimeMillis();
-        //stats.put(aliveCells.size(), (1.0*stop-start));
     }
 
     private int getNextState(Cell c) {
@@ -185,18 +177,28 @@ public class Automaton {
         return false;
     }
 
-    public ArrayList<Cell> getCells() {
-        return cells;
-    }
-
     public void reset() {
         cellMap.clear();
         cells.clear();
         tickCount = 0;
     }
 
+    public ArrayList<Cell> getCells() {
+        return cells;
+    }
+
     public int getTickCount() {
         return tickCount;
+    }
+
+    public int getTickInterval() {
+        return tickInterval;
+    }
+
+    public void setTickInterval(int tickInterval) {
+        this.tickInterval = Math.max(10, tickInterval);
+        stop();
+        start();
     }
 
     public String toString() {

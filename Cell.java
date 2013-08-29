@@ -16,7 +16,6 @@ public class Cell {
 
     int x, y, state, nextState, age;
     int[][] neighCoords;
-    ArrayList<Cell> neighbours;
 
     public Cell(int x, int y, int state) {
         this.x = x;
