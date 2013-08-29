@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
 
 /**
@@ -94,7 +93,7 @@ public class Automaton {
         cells = aliveCells;
 
         //stop = System.currentTimeMillis();
-        //sstats.put(aliveCells.size(), (1.0*stop-start));
+        //stats.put(aliveCells.size(), (1.0*stop-start));
     }
 
     private int getNextState(Cell c) {
