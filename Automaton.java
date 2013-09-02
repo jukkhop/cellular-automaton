@@ -41,7 +41,7 @@ public class Automaton {
         cells = new ArrayList<Cell>();
     }
 
-    private Cell addCell(int x, int y, int state) {
+    private Cell addCell(int x, int y, boolean state) {
         Cell c = new Cell(x, y, state);
         cellMap.put(new Coords(x, y), c);
         return c;
@@ -60,7 +60,7 @@ public class Automaton {
     private void tick() {
         tickCount++;
 
-        ArrayList<Cell> changingCells = new ArrayList<Cell>();
+        ArrayList<Cell> processedCells = new ArrayList<Cell>();
         ArrayList<Cell> aliveCells = new ArrayList<Cell>();
 
         for (Cell cell : cells) {
@@ -68,42 +68,46 @@ public class Automaton {
             block.add(cell);
             
             for (Cell c : block) {
-                if (c.age == tickCount) continue;
-                c.age = tickCount;
+                if (c.processed) continue;
+                c.processed = true;
 
                 c.nextState = getNextState(c);
-                    
-                if (c.state != c.nextState)
-                    changingCells.add(c);
+                processedCells.add(c);
 
                 if (c.nextState == Cell.ALIVE)
                     aliveCells.add(c);
             }
         }
 
-        // Change the necessary cell states
-        for (Cell c : changingCells) c.state = c.nextState;
+        // Change the cell states for cells that were processed
+        for (Cell c : processedCells) {
+            c.state = c.nextState;
+            c.processed = false;
+        }
 
         // Replace cells with those that will be alive next gen
         cells = aliveCells;
     }
 
-    private int getNextState(Cell c) {
+    private boolean getNextState(Cell c) {
         int n = countNeighbours(c);
-        int nextState = Integer.MIN_VALUE;
-        if (c.state == Cell.ALIVE)
-            nextState = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
-        
-        if (c.state == Cell.DEAD)
-            nextState = ((B_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
+        boolean state = false;
+        if (c.state == Cell.ALIVE) {
+            state = ((S_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
+        } else {
+            state = ((B_RULE&FLAGS[n]) != 0) ? Cell.ALIVE : Cell.DEAD;
+        }
 
-        return nextState;
+        return state;
     }
 
     private ArrayList<Cell> getNeighbours(Cell c) {
         ArrayList<Cell> neighs = new ArrayList<Cell>(8);
 
-        for (int[] coords : c.neighCoords) {
+        int[][] neighCoords = { {c.x, c.y-1}, {c.x+1, c.y-1}, {c.x+1, c.y}, {c.x+1, c.y+1},
+                                {c.x, c.y+1}, {c.x-1, c.y+1}, {c.x-1, c.y}, {c.x-1, c.y-1} };
+
+        for (int[] coords : neighCoords) {
             Cell n = getCellAt(coords[0], coords[1]);
             if (n == null)
                 n = addCell(coords[0], coords[1], Cell.DEAD);

@@ -11,20 +11,17 @@
  */
 public class Cell {
     
-    public static final int ALIVE = 1;
-    public static final int DEAD  = 0; 
+    public static final boolean ALIVE = true;
+    public static final boolean DEAD  = false;
 
-    int x, y, state, nextState, age;
-    int[][] neighCoords;
+    int x, y;
+    boolean state, nextState, processed;
 
-    public Cell(int x, int y, int state) {
+    public Cell(int x, int y, boolean state) {
         this.x = x;
         this.y = y;
         this.state = state;
 
-        age = 0;
-
-        neighCoords = new int[][] { {x, y-1}, {x+1, y-1}, {x+1, y}, {x+1, y+1},
-                                    {x, y+1}, {x-1, y+1}, {x-1, y}, {x-1, y-1} };
+        processed = false;
     }
 }
