@@ -224,7 +224,7 @@ public class Automaton {
         }
 
         public int hashCode() {
-            return x * 31 + y;
+            return x * 524287 + y;
         }
     }
 }

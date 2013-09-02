@@ -196,23 +196,6 @@ public class GUI extends JFrame {
                 randomize.setEnabled(true);
                 start.setEnabled(true);
                 stop.setEnabled(false);
-                
-                /* try {
-                    java.util.List sortedKeys = new ArrayList(automaton.stats.keySet());
-                    Collections.sort(sortedKeys);
-                    PrintWriter writer = new PrintWriter(new File("stats"));
-                    writer.print("[[\"Execution time\",");
-                    for (Object o : sortedKeys) {
-                        int key = (int) o;
-                        double value = automaton.stats.get(key);
-
-                        writer.print("[" + key + "," + value + "],");
-                    }
-                    writer.print("]]");
-                    writer.close();
-
-                } catch (IOException ex) { }
-                */
             }
         });
         grillCheckbox.addItemListener(new ItemListener() {
